@@ -106,7 +106,8 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Citation
 
-If you use `emltree` in academic work, please cite the underlying paper:
+If you use `emltree` in academic work, please cite **both** the paper and
+the software:
 
 ```bibtex
 @article{odrzywolek2026eml,
@@ -114,5 +115,13 @@ If you use `emltree` in academic work, please cite the underlying paper:
   author  = {Odrzywolek, Andrzej},
   journal = {arXiv preprint arXiv:2603.21852},
   year    = {2026}
+}
+
+@software{hsiao2026emltree,
+  author  = {Hsiao, Owen},
+  title   = {emltree: a Python compiler from elementary formulas to EML trees},
+  year    = {2026},
+  url     = {https://github.com/gba3124/emltree},
+  version = {0.1.0}
 }
 ```
