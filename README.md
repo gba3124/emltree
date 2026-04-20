@@ -118,7 +118,7 @@ the software:
 }
 
 @software{hsiao2026emltree,
-  author  = {Hsiao, Owen},
+  author  = {Hsiao, Wei-Chien},
   title   = {emltree: a Python compiler from elementary formulas to EML trees},
   year    = {2026},
   url     = {https://github.com/gba3124/emltree},
