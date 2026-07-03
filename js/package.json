@@ -1,0 +1,39 @@
+{
+  "name": "emltree",
+  "version": "0.1.0",
+  "description": "Compile elementary functions into pure EML form — exp/ln Sheffer-operator trees, eml(x, y) = exp(x) - ln(y) (arXiv:2603.21852). Zero dependencies.",
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "bin": {
+    "emltree": "cli.js"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "cli.js"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gba3124/emltree.git",
+    "directory": "js"
+  },
+  "keywords": [
+    "eml",
+    "sheffer",
+    "elementary-functions",
+    "symbolic",
+    "symbolic-regression",
+    "math",
+    "complex",
+    "operator"
+  ],
+  "author": "Wei-Chien Hsiao",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

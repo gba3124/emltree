@@ -71,6 +71,9 @@ def test_hyperbolic(formula, bindings):
         ("cos(x)", {"x": 0.9}),
         ("tan(x)", {"x": 0.4}),
         ("sin(x)**2 + cos(x)**2", {"x": 1.37}),
+        ("asin(x)", {"x": 0.6}),
+        ("acos(x)", {"x": 0.6}),
+        ("atan(x)", {"x": 0.6}),
     ],
 )
 def test_trig(formula, bindings):

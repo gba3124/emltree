@@ -214,10 +214,14 @@ def acos_(x: EMLNode) -> EMLNode:
 
 
 def atan_(x: EMLNode) -> EMLNode:
-    """(i/2) * ln((i - x)/(i + x))"""
+    """(i/2) * ln((i + x)/(i - x))
+
+    NB: (i - x)/(i + x) — the textbook-looking variant — is -atan(x):
+    (i-x)/(i+x) = (1+ix)/(1-ix) and (i/2)*ln((1+ix)/(1-ix)) = -atan(x).
+    """
     return mul_(
         div_(i_const(), integer(2)),
-        ln_(div_(sub_(i_const(), x), add_(i_const(), x))),
+        ln_(div_(add_(i_const(), x), sub_(i_const(), x))),
     )
 
 
