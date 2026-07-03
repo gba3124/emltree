@@ -36,16 +36,31 @@ export function toRpn(n) {
   return `${toRpn(n.left)} ${toRpn(n.right)} E`;
 }
 
+// (leaves, nodes, depth) of the unfolded tree, memoised by node identity —
+// shared subtrees (constants, cached integers) make naive recursion visit the
+// unfolded tree, millions of nodes for large numeric constants
+function stats(n, cache = new Map()) {
+  if (n.t !== 'eml') return [1, 1, 0];
+  let hit = cache.get(n);
+  if (!hit) {
+    const l = stats(n.left, cache);
+    const r = stats(n.right, cache);
+    hit = [l[0] + r[0], 1 + l[1] + r[1], 1 + Math.max(l[2], r[2])];
+    cache.set(n, hit);
+  }
+  return hit;
+}
+
 export function leafCount(n) {
-  return n.t === 'eml' ? leafCount(n.left) + leafCount(n.right) : 1;
+  return stats(n)[0];
 }
 
 export function nodeCount(n) {
-  return n.t === 'eml' ? 1 + nodeCount(n.left) + nodeCount(n.right) : 1;
+  return stats(n)[1];
 }
 
 export function depth(n) {
-  return n.t === 'eml' ? 1 + Math.max(depth(n.left), depth(n.right)) : 0;
+  return stats(n)[2];
 }
 
 export function* walk(n) {
@@ -82,19 +97,29 @@ export const div = (x, y) => exp(sub(ln(x), ln(y)));
 export const inv = (x) => exp(neg(ln(x)));
 export const pow = (x, y) => exp(mul(y, ln(x)));
 
-const intCache = new Map(); // ponytail: memo shares subtrees; huge n still means huge trees, same ceiling as the Python original
+// Binary decomposition: 2k -> 2*k, odd n -> m*(1+1/m). O(log n) trees, and the
+// odd step is multiplicative because add()'s expansion applies exp() to its
+// second operand, which overflows float64 past ~709. Everything entering exp()
+// stays O(ln n).
+const intCache = new Map();
 export function integer(n) {
   if (!Number.isSafeInteger(n)) throw new Error(`integer: ${n} is not a safe integer`);
   if (n < 0) return neg(integer(-n));
   if (n === 0) return ZERO;
   if (n === 1) return ONE;
-  let acc = intCache.get(n);
-  if (!acc) {
-    acc = ONE;
-    for (let i = 2; i <= n; i++) acc = add(ONE, acc);
-    intCache.set(n, acc);
+  let t = intCache.get(n);
+  if (!t) {
+    if (n === 2) {
+      t = add(ONE, ONE);
+    } else if (n % 2) {
+      const m = integer(n - 1);
+      t = mul(m, add(ONE, inv(m)));
+    } else {
+      t = mul(integer(2), integer(n / 2));
+    }
+    intCache.set(n, t);
   }
-  return acc;
+  return t;
 }
 
 export function rational(p, q) {
@@ -283,23 +308,29 @@ export function evaluate(node, bindings = {}) {
   for (const [k, v] of Object.entries(bindings)) {
     env.set(k, typeof v === 'number' ? { re: v, im: 0 } : { re: v.re ?? 0, im: v.im ?? 0 });
   }
-  return ev(node, env);
+  return ev(node, env, new Map());
 }
 
-function ev(n, env) {
+function ev(n, env, cache) {
   if (n.t === '1') return { re: 1, im: 0 };
   if (n.t === 'var') {
     const v = env.get(n.name);
     if (v === undefined) throw new Error(`unbound variable '${n.name}' — provide it via bindings`);
     return v;
   }
-  const a = ev(n.left, env);
-  const b = ev(n.right, env);
+  // trees share subtrees heavily (constants, cached integers); memoising by
+  // node identity makes evaluation O(unique nodes) instead of O(unfolded tree)
+  const hit = cache.get(n);
+  if (hit !== undefined) return hit;
+  const a = ev(n.left, env, cache);
+  const b = ev(n.right, env, cache);
   // eml(x, y) = exp(x) - ln(y), principal branch (matches numpy semantics)
   // real-axis special case keeps C99 cexp(±inf + 0i) semantics: r * sin(0) must be 0, not inf*0 = NaN
   const r = Math.exp(a.re);
-  return {
+  const out = {
     re: (a.im === 0 ? r : r * Math.cos(a.im)) - Math.log(Math.hypot(b.re, b.im)),
     im: (a.im === 0 ? 0 : r * Math.sin(a.im)) - Math.atan2(b.im, b.re),
   };
+  cache.set(n, out);
+  return out;
 }

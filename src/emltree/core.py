@@ -11,6 +11,35 @@ from dataclasses import dataclass
 from typing import Iterator
 
 
+def _stats(node: "EMLNode") -> tuple[int, int, int]:
+    """(leaf_count, node_count, depth) of the unfolded tree.
+
+    Memoised by node identity: constants and cached integers share subtrees
+    heavily, so naive recursion visits the *unfolded* tree — millions of
+    nodes for large numeric constants. This stays O(unique nodes) while
+    still reporting unfolded counts (the paper's complexity measure).
+    """
+    cache: dict[int, tuple[int, int, int]] = {}
+
+    def go(n: EMLNode) -> tuple[int, int, int]:
+        if not isinstance(n, Eml):
+            return (1, 1, 0)
+        key = id(n)
+        hit = cache.get(key)
+        if hit is None:
+            left = go(n.left)
+            right = go(n.right)
+            hit = (
+                left[0] + right[0],
+                1 + left[1] + right[1],
+                1 + max(left[2], right[2]),
+            )
+            cache[key] = hit
+        return hit
+
+    return go(node)
+
+
 class EMLNode:
     """Base class for EML tree nodes."""
 
@@ -21,17 +50,17 @@ class EMLNode:
         """Reverse Polish notation; EML is encoded as 'E'."""
         raise NotImplementedError
 
-    def leaf_count(self) -> int:
-        raise NotImplementedError
-
-    def node_count(self) -> int:
-        raise NotImplementedError
-
-    def depth(self) -> int:
-        raise NotImplementedError
-
     def walk(self) -> Iterator["EMLNode"]:
         raise NotImplementedError
+
+    def leaf_count(self) -> int:
+        return _stats(self)[0]
+
+    def node_count(self) -> int:
+        return _stats(self)[1]
+
+    def depth(self) -> int:
+        return _stats(self)[2]
 
 
 @dataclass(frozen=True)
@@ -41,15 +70,6 @@ class One(EMLNode):
 
     def to_rpn(self) -> str:
         return "1"
-
-    def leaf_count(self) -> int:
-        return 1
-
-    def node_count(self) -> int:
-        return 1
-
-    def depth(self) -> int:
-        return 0
 
     def walk(self) -> Iterator[EMLNode]:
         yield self
@@ -65,15 +85,6 @@ class Var(EMLNode):
     def to_rpn(self) -> str:
         return self.name
 
-    def leaf_count(self) -> int:
-        return 1
-
-    def node_count(self) -> int:
-        return 1
-
-    def depth(self) -> int:
-        return 0
-
     def walk(self) -> Iterator[EMLNode]:
         yield self
 
@@ -88,15 +99,6 @@ class Eml(EMLNode):
 
     def to_rpn(self) -> str:
         return f"{self.left.to_rpn()} {self.right.to_rpn()} E"
-
-    def leaf_count(self) -> int:
-        return self.left.leaf_count() + self.right.leaf_count()
-
-    def node_count(self) -> int:
-        return 1 + self.left.node_count() + self.right.node_count()
-
-    def depth(self) -> int:
-        return 1 + max(self.left.depth(), self.right.depth())
 
     def walk(self) -> Iterator[EMLNode]:
         yield self

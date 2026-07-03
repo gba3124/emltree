@@ -35,14 +35,20 @@ try {
   process.exit(2);
 }
 
-console.log(
-  format === 'rpn' ? toRpn(tree)
-  : format === 'tree' ? asciiTree(tree).trimEnd()
-  : toNested(tree),
-);
+const nodes = nodeCount(tree);
+const printable = nodes <= 200_000; // rendered strings scale with the unfolded tree; past this they reach hundreds of MB
+if (printable) {
+  console.log(
+    format === 'rpn' ? toRpn(tree)
+    : format === 'tree' ? asciiTree(tree).trimEnd()
+    : toNested(tree),
+  );
+} else {
+  console.error(`error: tree unfolds to ${nodes} nodes — too large to print; use --stats / --eval`);
+}
 
 if (stats) {
-  console.error(`[stats] leaves=${leafCount(tree)} nodes=${nodeCount(tree)} depth=${depth(tree)}`);
+  console.error(`[stats] leaves=${leafCount(tree)} nodes=${nodes} depth=${depth(tree)}`);
 }
 
 if (evalPairs !== null) {
@@ -54,3 +60,5 @@ if (evalPairs !== null) {
   const { re, im } = evaluate(tree, bindings);
   console.error(`[eval] ${re}${im < 0 ? '' : '+'}${im}i`);
 }
+
+if (!printable && !stats && evalPairs === null) process.exit(2);

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compile, evaluate, toNested, toRpn, leafCount, depth,
-  ln, exp, variable,
+  ln, exp, variable, integer,
 } from './index.js';
 
 function close(got, expected, tol = 1e-9) {
@@ -32,6 +32,11 @@ check('x**3', { x: 1.3 }, 1.3 ** 3);
 check('x^3', { x: 1.3 }, 1.3 ** 3);
 check('x**y', { x: 2, y: 3.5 }, 2 ** 3.5);
 check('exp(x) - log(y)', { x: 0.3, y: 2.5 }, Math.exp(0.3) - Math.log(2.5));
+// decimals / big integers — hung or overflowed before binary integer()
+check('0.001', {}, 0.001);
+check('123456', {}, 123456);
+check('1234567.89', {}, 1234567.89);
+check('x + 1e-3', { x: 1 }, 1.001);
 check('log(x, 2)', { x: 8 }, 3, 1e-8);
 check('sigmoid(x)', { x: 0.5 }, 1 / (1 + Math.exp(-0.5)));
 
@@ -71,6 +76,12 @@ test('paper exp identity', () => {
 test('rpn encoding', () => {
   // paper: RPN for ln is  1 1 x E 1 E E
   assert.equal(toRpn(ln(variable('x'))), '1 1 x E 1 E E');
+});
+
+test('binary integer encoding stays shallow', () => {
+  // depth bounds recursion in ev/toNested; guards regression to the unary chain
+  assert.ok(depth(integer(1000)) < 400);
+  assert.ok(depth(integer(999999937)) < 900);
 });
 
 test('unbound variable throws', () => {

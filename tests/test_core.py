@@ -41,6 +41,11 @@ def _roundtrip(expression: str, bindings: dict[str, complex]):
         ("x**3", {"x": 1.3}),
         ("x**y", {"x": 2.0, "y": 3.5}),
         ("exp(x) - log(y)", {"x": 0.3, "y": 2.5}),
+        # decimals / big integers — RecursionError before binary integer()
+        ("0.001", {}),
+        ("123456", {}),
+        ("1234567.89", {}),
+        ("x + 1e-3", {"x": 1.0}),
     ],
 )
 def test_algebra(formula, bindings):
@@ -117,3 +122,24 @@ def test_rpn_encoding():
 
     tree = ln_(var("x"))
     assert tree.to_rpn() == "1 1 x E 1 E E"
+
+
+def test_binary_integer_encoding_stays_shallow():
+    """Guard against regressing to the unary 1+1+...+1 chain.
+
+    Depth is the invariant that matters: it bounds recursion in _eval /
+    to_nested. (node_count() counts the *unfolded* tree, which double-counts
+    shared subtrees from the multiplicative odd step — not meaningful here.)
+    """
+    from emltree.primitives import integer
+
+    assert integer(1000).depth() < 400
+    assert integer(999999937).depth() < 900
+
+
+def test_vectorized_evaluate():
+    tree = compile_formula("sin(x)**2 + cos(x)**2", variables=["x"])
+    xs = np.linspace(-2.0, 2.0, 7)
+    vals = evaluate(tree, {"x": xs})
+    assert vals.shape == xs.shape
+    assert np.allclose(vals, 1.0, atol=1e-7)

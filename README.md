@@ -24,7 +24,8 @@ constants `e`, `π`, `i`). Every elementary expression becomes a binary
 tree whose only internal node is `eml`. This package is the inverse
 direction: it **takes an ordinary formula and compiles it into that
 tree**. A sibling Rust crate, [OxiEML](https://github.com/cool-japan/oxieml),
-covers the Rust ecosystem; `emltree` focuses on the Python side.
+covers the Rust ecosystem; a zero-dependency JS/TypeScript port lives in
+[`js/`](./js) (npm: `emltree`); this package is the Python side.
 
 ## Quick start
 
@@ -53,8 +54,17 @@ print(evaluate(tree, {"x": 3.0, "y": 4.0}))   # ≈ 5+0j
 ```
 
 The returned tree is an immutable ADT (`One` / `Var` / `Eml`) — walk it,
-hash it, render as RPN (`1 x E 1 E`), or ship it into an FPGA/analog
-circuit as the paper suggests.
+hash it, render as RPN (`exp(x)` is `x 1 E`), or ship it into an
+FPGA/analog circuit as the paper suggests.
+
+Evaluation is vectorised: pass numpy arrays as bindings and the tree
+evaluates elementwise.
+
+```python
+import numpy as np
+xs = np.linspace(-2, 2, 1000)
+evaluate(tree, {"x": xs, "y": xs})   # array of 1000 values
+```
 
 ## Why the trees are large
 
@@ -62,6 +72,19 @@ This compiler is **compositional**, not optimal. Every primitive bottoms
 out in `exp / ln / sub`, so `sin(x)` produces a tree with hundreds of
 nodes. The paper's direct-search results (Table 4) are vastly shorter —
 integrating that search is one of the open directions below.
+
+## Numerical caveats
+
+- **Branch cuts**: outside their real domains (`asin(2)`, `acosh(-2)`,
+  `log` of negatives, …) results flow through complex branch cuts and may
+  land on a non-principal branch — or, where float fuzz compounds,
+  off-sheet entirely (paper §4.1). On the usual real domains everything
+  matches sympy to ~1e-7.
+- **Addition overflow**: `add_`'s expansion applies `exp()` to its second
+  operand, so adding values past ~709 overflows float64. Integer/decimal
+  constants avoid this internally (binary decomposition with a
+  multiplicative odd step), but `x + y` with huge `y` is an inherent
+  ceiling of the encoding.
 
 ## Tests
 
@@ -80,8 +103,8 @@ great first PR:
 - **More primitives** — `abs`, `sign`, `floor`, `ceil`, `erf`, etc.
   (many require tricks; see the paper's supplementary).
 - **Better output** — LaTeX, GraphViz / Mermaid, Jupyter rich repr.
-- **Batched evaluation** — a vectorised numpy/torch evaluator for
-  large input arrays.
+- **Torch evaluation** — numpy bindings already vectorise; a torch
+  evaluator would make EML trees differentiable end-to-end.
 - **Optional Rust backend** — PyO3 bindings to
   [OxiEML](https://github.com/cool-japan/oxieml) for expensive search
   and symbolic regression.
@@ -122,6 +145,6 @@ the software:
   title   = {emltree: a Python compiler from elementary formulas to EML trees},
   year    = {2026},
   url     = {https://github.com/gba3124/emltree},
-  version = {0.1.0}
+  version = {0.1.1}
 }
 ```

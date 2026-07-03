@@ -91,9 +91,14 @@ def sqrt_(x: EMLNode) -> EMLNode:
 
 @lru_cache(maxsize=None)
 def integer(n: int) -> EMLNode:
-    """Build a non-negative integer as 1 + 1 + ... + 1.
+    """Build an integer by binary decomposition: 2k -> 2*k, 2k+1 -> m*(1+1/m).
 
-    Negative integers go through `neg_`.
+    O(log n) tree instead of the naive 1 + 1 + ... + 1 unary chain, which
+    hit RecursionError for n ≳ 1000 (so even `0.001` = 1/1000 failed to
+    compile). The odd step is multiplicative (m + 1 = m * (1 + 1/m)) rather
+    than add_(1, m): add_'s expansion applies exp() to its second operand,
+    which overflows float64 for values > ~709. Here everything entering
+    exp() stays O(ln n). Negative integers go through `neg_`.
     """
     if n < 0:
         return neg_(integer(-n))
@@ -101,7 +106,12 @@ def integer(n: int) -> EMLNode:
         return zero()
     if n == 1:
         return one()
-    return add_(one(), integer(n - 1))
+    if n == 2:
+        return add_(one(), one())
+    if n % 2:
+        m = integer(n - 1)
+        return mul_(m, add_(one(), inv_(m)))
+    return mul_(integer(2), integer(n // 2))
 
 
 @lru_cache(maxsize=None)

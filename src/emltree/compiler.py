@@ -7,6 +7,7 @@ Unknown nodes raise `EMLCompileError` with a clear message.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from fractions import Fraction
 
 import sympy as sp
@@ -53,7 +54,7 @@ def _compile(expr: sp.Basic) -> EMLNode:
     if expr is sp.S.NegativeOne:
         return P.integer(-1)
     if expr is sp.S.One:
-        return P.one() if False else P.integer(1)
+        return P.integer(1)
     if expr is sp.S.Zero:
         return P.zero()
     if expr is sp.S.Half:
@@ -106,7 +107,7 @@ def _fold(args: list[EMLNode], op) -> EMLNode:
     return acc
 
 
-_UNARY: dict[str, callable] = {
+_UNARY: dict[str, Callable[[EMLNode], EMLNode]] = {
     "exp": P.exp_,
     "log": P.ln_,      # sympy's log/ln both resolve to sympy.log
     "ln": P.ln_,

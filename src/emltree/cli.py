@@ -68,12 +68,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {e}", file=sys.stderr)
         return 2
 
-    if args.format == "nested":
-        print(tree.to_nested())
-    elif args.format == "rpn":
-        print(tree.to_rpn())
+    nodes = tree.node_count()
+    # rendered strings scale with the unfolded tree; past this they reach hundreds of MB
+    printable = nodes <= 200_000
+    if printable:
+        if args.format == "nested":
+            print(tree.to_nested())
+        elif args.format == "rpn":
+            print(tree.to_rpn())
+        else:
+            print(ascii_tree(tree).rstrip())
     else:
-        print(ascii_tree(tree).rstrip())
+        print(
+            f"error: tree unfolds to {nodes} nodes — too large to print; "
+            "use --stats / --verify",
+            file=sys.stderr,
+        )
 
     if args.stats:
         print(
@@ -103,6 +113,8 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0 if ok else 1
 
+    if not printable and not args.stats:
+        return 2
     return 0
 
 

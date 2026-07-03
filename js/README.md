@@ -56,6 +56,17 @@ Supported syntax: `+ - * / ^ **`, `sqrt exp log ln sin cos tan asin acos atan
 sinh cosh tanh asinh acosh atanh sigmoid`, two-arg `log(x, base)`, constants
 `pi E I`.
 
+## Caveats
+
+- **Branch cuts**: outside their real domains (`asin(2)`, `acosh(-2)`, `log` of
+  negatives, …) results flow through complex branch cuts and may land on a
+  non-principal branch — or, where float fuzz compounds, off-sheet entirely
+  (paper §4.1). On the usual real domains everything matches to ~1e-7.
+- **Addition overflow**: `add`'s expansion applies `exp()` to its second
+  operand, so adding values past ~709 overflows float64. Integer/decimal
+  constants avoid this internally (binary decomposition, multiplicative odd
+  step), but `x + y` with huge `y` is an inherent ceiling of the encoding.
+
 ## Canonical identities
 
 ```
