@@ -1,0 +1,236 @@
+{
+  "note": "Shared cross-language vectors. Expected values come from Python's math module, independent of both EML implementations. Both tests/test_vectors.py and js/vectors.test.js must pass every case.",
+  "tolerance": 1e-09,
+  "cases": [
+    {
+      "formula": "x",
+      "bindings": {
+        "x": 2.5
+      },
+      "expected": 2.5
+    },
+    {
+      "formula": "x + y",
+      "bindings": {
+        "x": 1.5,
+        "y": 0.7
+      },
+      "expected": 2.2
+    },
+    {
+      "formula": "x - y",
+      "bindings": {
+        "x": 4.0,
+        "y": 1.25
+      },
+      "expected": 2.75
+    },
+    {
+      "formula": "x * y",
+      "bindings": {
+        "x": 3.0,
+        "y": 2.0
+      },
+      "expected": 6.0
+    },
+    {
+      "formula": "x / y",
+      "bindings": {
+        "x": 7.0,
+        "y": 4.0
+      },
+      "expected": 1.75
+    },
+    {
+      "formula": "1/x",
+      "bindings": {
+        "x": 0.8
+      },
+      "expected": 1.25
+    },
+    {
+      "formula": "-x",
+      "bindings": {
+        "x": 3.14
+      },
+      "expected": -3.14
+    },
+    {
+      "formula": "x**2 + 1",
+      "bindings": {
+        "x": 3.0
+      },
+      "expected": 10.0
+    },
+    {
+      "formula": "x**3",
+      "bindings": {
+        "x": 1.7
+      },
+      "expected": 4.912999999999999
+    },
+    {
+      "formula": "sqrt(x**2 + y**2)",
+      "bindings": {
+        "x": 3.0,
+        "y": 4.0
+      },
+      "expected": 5.0
+    },
+    {
+      "formula": "exp(x)",
+      "bindings": {
+        "x": 1.2
+      },
+      "expected": 3.3201169227365472
+    },
+    {
+      "formula": "log(x)",
+      "bindings": {
+        "x": 3.0
+      },
+      "expected": 1.0986122886681098
+    },
+    {
+      "formula": "sqrt(x)",
+      "bindings": {
+        "x": 5.0
+      },
+      "expected": 2.23606797749979
+    },
+    {
+      "formula": "sin(x)",
+      "bindings": {
+        "x": 0.9
+      },
+      "expected": 0.7833269096274834
+    },
+    {
+      "formula": "cos(x)",
+      "bindings": {
+        "x": 0.9
+      },
+      "expected": 0.6216099682706644
+    },
+    {
+      "formula": "tan(x)",
+      "bindings": {
+        "x": 0.4
+      },
+      "expected": 0.4227932187381618
+    },
+    {
+      "formula": "asin(x)",
+      "bindings": {
+        "x": 0.5
+      },
+      "expected": 0.5235987755982988
+    },
+    {
+      "formula": "acos(x)",
+      "bindings": {
+        "x": 0.5
+      },
+      "expected": 1.0471975511965976
+    },
+    {
+      "formula": "atan(x)",
+      "bindings": {
+        "x": 0.8
+      },
+      "expected": 0.6747409422235527
+    },
+    {
+      "formula": "atan(x)",
+      "bindings": {
+        "x": -0.8
+      },
+      "expected": -0.6747409422235527
+    },
+    {
+      "formula": "sinh(x)",
+      "bindings": {
+        "x": 0.6
+      },
+      "expected": 0.6366535821482412
+    },
+    {
+      "formula": "cosh(x)",
+      "bindings": {
+        "x": 0.6
+      },
+      "expected": 1.1854652182422676
+    },
+    {
+      "formula": "tanh(x)",
+      "bindings": {
+        "x": 0.6
+      },
+      "expected": 0.5370495669980353
+    },
+    {
+      "formula": "asinh(x)",
+      "bindings": {
+        "x": 1.2
+      },
+      "expected": 1.015973134179692
+    },
+    {
+      "formula": "acosh(x)",
+      "bindings": {
+        "x": 2.0
+      },
+      "expected": 1.3169578969248166
+    },
+    {
+      "formula": "atanh(x)",
+      "bindings": {
+        "x": 0.5
+      },
+      "expected": 0.5493061443340549
+    },
+    {
+      "formula": "sigmoid(x)",
+      "bindings": {
+        "x": 0.7
+      },
+      "expected": 0.6681877721681662
+    },
+    {
+      "formula": "sigmoid(x)",
+      "bindings": {
+        "x": -2.0
+      },
+      "expected": 0.11920292202211755
+    },
+    {
+      "formula": "sin(x)**2 + cos(x)**2",
+      "bindings": {
+        "x": 0.9
+      },
+      "expected": 1.0
+    },
+    {
+      "formula": "exp(log(x))",
+      "bindings": {
+        "x": 4.2
+      },
+      "expected": 4.2
+    },
+    {
+      "formula": "log(x)/log(y)",
+      "bindings": {
+        "x": 8.0,
+        "y": 2.0
+      },
+      "expected": 3.0
+    },
+    {
+      "formula": "tanh(x) - sinh(x)/cosh(x)",
+      "bindings": {
+        "x": 1.1
+      },
+      "expected": 0.0
+    }
+  ]
+}

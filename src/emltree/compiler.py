@@ -20,9 +20,19 @@ class EMLCompileError(ValueError):
     pass
 
 
+class sigmoid(sp.Function):
+    """Logistic sigmoid. sympy has no builtin, so formula strings get ours.
+
+    Kept as an unevaluated Function (rather than sympifying to
+    ``1/(1+exp(-x))``) so it reaches ``P.sigmoid_``: that expansion is
+    35 nodes against sympy's 57, and matches the JS port's tree shape.
+    """
+
+
 def compile_formula(expression: str, variables: list[str] | None = None) -> EMLNode:
     """Parse a string formula with sympy, then compile it."""
-    local = {name: sp.Symbol(name) for name in (variables or [])}
+    local: dict[str, sp.Basic | type[sp.Function]] = {"sigmoid": sigmoid}
+    local.update({name: sp.Symbol(name) for name in (variables or [])})
     expr = sp.sympify(expression, locals=local, convert_xor=True)
     return compile_sympy(expr)
 
@@ -124,4 +134,5 @@ _UNARY: dict[str, Callable[[EMLNode], EMLNode]] = {
     "asinh": P.asinh_,
     "acosh": P.acosh_,
     "atanh": P.atanh_,
+    "sigmoid": P.sigmoid_,
 }

@@ -89,8 +89,17 @@ integrating that search is one of the open directions below.
 ## Tests
 
 ```bash
-uv run pytest
+uv run pytest          # Python
+cd js && node --test   # JS port
 ```
+
+[`vectors.json`](./vectors.json) holds cross-language cases — formula,
+bindings, and an expected value taken from Python's `math` module, so it is
+independent of both implementations. `tests/test_vectors.py` and
+`js/vectors.test.js` each run every case. **A change that makes one port
+disagree with the other fails there**, rather than waiting to be spotted
+during the next hand-port (which is how the 0.1.1 `atan` sign bug surfaced).
+New primitives should land with a vector.
 
 ## Contributing
 
@@ -145,6 +154,6 @@ the software:
   title   = {emltree: a Python compiler from elementary formulas to EML trees},
   year    = {2026},
   url     = {https://github.com/gba3124/emltree},
-  version = {0.1.1}
+  version = {0.1.2}
 }
 ```
