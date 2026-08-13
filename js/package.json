@@ -1,6 +1,6 @@
 {
   "name": "emltree",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Compile elementary functions into pure EML form — exp/ln Sheffer-operator trees, eml(x, y) = exp(x) - ln(y) (arXiv:2603.21852). Zero dependencies.",
   "type": "module",
   "main": "index.js",
